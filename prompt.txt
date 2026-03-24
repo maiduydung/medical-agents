@@ -1,0 +1,79 @@
+right very big ask incoming
+take a look at this company https://www.itrvn.com/
+and their job posting 
+	
+
+Human Resources Department
+ITR VN CORPORATION
+ 
+ 
+AI AGENTIC APPLICATION DEVELOPER
+
+ 
+I. KEY RESPONSIBILITIES:
+• Design and build AI-powered agentic applications that automate complex business workflows.
+• Integrate LLM APIs with internal systems, data sources, and third-party services.
+• Architect multi-agent systems with reliable tool use, memory, and orchestration.
+• Deploy and operate applications on AWS with production-grade reliability.
+• Identify high-impact automation opportunities across the business and turn them into shipped products.
+ 
+II. KEY SKILLS AND QUALIFICATIONS:
+• 3+ years of professional software development experience.
+• At least 1 year of hands-on experience building AI or LLM-powered applications.
+• Must have: Proficient in Python or JavaScript or Golang – able to ship production-ready code independently.
+• Hands-on experience with LLM APIs (AWS Bedrock, OpenAI, Anthropic Claude, Google Gemini, or equivalent).
+• Solid understanding of how LLMs work: context windows, tool use, function calling, and agent loops.
+• AWS required – Lambda, S3, EC2, Bedrock and equivalent cloud services.
+• Comfortable working in Linux environments – shell scripting and basic system administration.
+• Familiar with at least one agent framework (Strands Agent, LangChain, LangGraph, AutoGen, CrewAI, or similar).
+• Experience building RAG pipelines or knowledge retrieval systems.
+• Familiarity with vector databases (Pinecone, Weaviate, ChromaDB, or equivalent).
+• Self-directed – identifies problems, not just executes assigned tasks.
+• Comfortable operating with incomplete requirements and finding own path forward.
+• Learns new frameworks and tools independently from documentation.
+• Delivers under tight timelines; stays composed when scope shifts or systems break in production.
+• Applies good judgment on when AI is – and is not – the right solution.
+• Exposure to prompt engineering techniques or evaluation frameworks.
+• Prior work in a fast-moving product or startup environment.
+ 
+ 
+III. BENEFITS:
+1. Best place to develop yourself
+• Clear growth path in an emerging AI-focused team – early mover advantage shaping how AI is adopted.
+• Learning & development budget – courses, conferences, and certifications supported.
+• Modern equipment provided.
+• Direct exposure to real business challenges with measurable impact.
+• Flat organizational structure – your ideas and opinions are always welcomed and respected.
+ 
+
+tomorrow i got an interview with this them, i need a quick demo to review the latest on agentic system, all the stuffs the cools kids are using
+- multi-agent
+- self-improve
+- skills.md that use to manage tools
+- deterministic workflows for an non-deterministic tool:LLMs
+- other things u can think off
+
+but i also got an existing demo at financial_agents/ financial_data/
+dungmai@Dungs-MacBook-Pro-2 ~/D/W/InterviewDemo> pwd
+/Users/dungmai/Desktop/Work/InterviewDemo
+
+look at both of them and try to understand what i did, 
+i dont need a productionize syste, just a demo good enough to prove i understand and can show them tmr in the meeting to impress them
+also check there website first https://www.itrvn.com/
+then look at my past demo
+then build me a new one, something with a medical theme, healthcare hardware in mind, related to them basically
+and that demo gotta include all the latest stuffs the cool kids are doing and using the same tools in my past demo
+
+lmk if u got any Qs
+
+
+i was thinking of a eventbased system, like a ring that tracks ur metrics, like every second it's sends u
+{
+"heart_rate": 120,
+"blood_pressure": 1,
+and sth
+}
+
+so we can get a function to randomize those metrics, probably throw them to a service bus, then another function app can dequeue from them, 
+then it can call the agents on those data, decide if it need to use tools, what tools, is rule based enough, or even call an ambulance
+stuffs like that, dont know, just pop in my mind, provide push back if needed
