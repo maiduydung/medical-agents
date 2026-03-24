@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4.1-2025-04-14")
+OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-5.4-2026-03-05")
 EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL", "text-embedding-3-small")
 
 CHROMA_API_KEY = os.getenv("CHROMA_API_KEY")
