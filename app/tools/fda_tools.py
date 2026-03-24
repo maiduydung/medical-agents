@@ -19,7 +19,7 @@ def fda_adverse_events(device_name: str, limit: int = 5) -> str:
         device_name: Device type to search for (e.g. "cardiac monitor", "pulse oximeter").
         limit: Number of results to return (default 5).
     """
-    logger.info("Querying openFDA adverse events for: %s", device_name)
+    logger.info("🏛️  [FDA] Querying adverse events for: %s", device_name)
     url = f"{OPENFDA_BASE_URL}/device/event.json"
     params = {
         "search": f'device.generic_name:"{device_name}"',
@@ -48,11 +48,11 @@ def fda_adverse_events(device_name: str, limit: int = 5) -> str:
             brand = device_info.get("brand_name", "unknown")
             parts.append(f"[{date}] {brand} — {event_type}\n{description}")
 
-        logger.info("Found %d adverse events for %s", len(results), device_name)
+        logger.info("🏛️  [FDA] Found %d adverse events for '%s'", len(results), device_name)
         return f"FDA Adverse Events for '{device_name}':\n\n" + "\n\n---\n\n".join(parts)
 
     except Exception as e:
-        logger.warning("openFDA query failed: %s", e)
+        logger.warning("🏛️  [FDA] Query failed: %s", e)
         return f"Failed to query FDA adverse events: {e}"
 
 
@@ -66,7 +66,7 @@ def fda_device_recall(device_name: str, limit: int = 5) -> str:
         device_name: Device type to search (e.g. "blood pressure monitor").
         limit: Number of results to return.
     """
-    logger.info("Querying openFDA recalls for: %s", device_name)
+    logger.info("🏛️  [FDA] Querying recalls for: %s", device_name)
     url = f"{OPENFDA_BASE_URL}/device/recall.json"
     params = {
         "search": f'product_description:"{device_name}"',
@@ -91,11 +91,11 @@ def fda_device_recall(device_name: str, limit: int = 5) -> str:
             product = r.get("product_description", "")[:150]
             parts.append(f"Firm: {firm}\nProduct: {product}\nReason: {reason}")
 
-        logger.info("Found %d recalls for %s", len(results), device_name)
+        logger.info("🏛️  [FDA] Found %d recalls for '%s'", len(results), device_name)
         return f"FDA Device Recalls for '{device_name}':\n\n" + "\n\n---\n\n".join(parts)
 
     except Exception as e:
-        logger.warning("openFDA recall query failed: %s", e)
+        logger.warning("🏛️  [FDA] Recall query failed: %s", e)
         return f"Failed to query FDA recalls: {e}"
 
 
@@ -107,7 +107,7 @@ def fda_drug_interactions(drug_name: str, limit: int = 5) -> str:
         drug_name: Drug name (generic or brand, e.g. "metoprolol", "aspirin").
         limit: Number of results.
     """
-    logger.info("Querying openFDA drug events for: %s", drug_name)
+    logger.info("💊 [FDA] Querying drug events for: %s", drug_name)
     url = f"{OPENFDA_BASE_URL}/drug/event.json"
     params = {
         "search": f'patient.drug.medicinalproduct:"{drug_name}"',
@@ -130,9 +130,9 @@ def fda_drug_interactions(drug_name: str, limit: int = 5) -> str:
             serious = r.get("serious", 0)
             parts.append(f"Reactions: {', '.join(reactions[:5])}\nSerious: {'Yes' if serious else 'No'}")
 
-        logger.info("Found %d drug events for %s", len(results), drug_name)
+        logger.info("💊 [FDA] Found %d drug events for '%s'", len(results), drug_name)
         return f"FDA Drug Adverse Events for '{drug_name}':\n\n" + "\n\n---\n\n".join(parts)
 
     except Exception as e:
-        logger.warning("openFDA drug query failed: %s", e)
+        logger.warning("💊 [FDA] Drug query failed: %s", e)
         return f"Failed to query FDA drug events: {e}"

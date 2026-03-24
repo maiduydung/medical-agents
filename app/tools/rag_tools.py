@@ -18,12 +18,12 @@ def retrieve_docs(query: str, category: str | None = None) -> str:
         query: What information you need, e.g. "tachycardia treatment protocol"
         category: Optional filter — "cardiac", "respiratory", "general", etc.
     """
-    logger.info("Retrieving docs — query='%s', category=%s", query, category)
+    logger.info("📚 [RAG] Searching knowledge base — query='%s', category=%s", query, category)
     docs = _retrieve(query, category=category, n_results=5)
     if not docs:
-        logger.info("No documents found in knowledge base")
+        logger.info("📚 [RAG] No documents found in knowledge base")
         return "No relevant documents found in the knowledge base."
-    logger.info("Retrieved %d documents", len(docs))
+    logger.info("📚 [RAG] Retrieved %d documents (top distance=%.3f)", len(docs), docs[0]["distance"])
     parts = []
     for doc in docs:
         meta = doc["metadata"]

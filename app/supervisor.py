@@ -41,11 +41,23 @@ async def process_vitals(vitals: dict) -> dict:
         }
     """
     timestamp = datetime.now(timezone.utc).isoformat()
-    logger.info("Processing vitals at %s", timestamp)
+    hr = vitals.get("heart_rate", "?")
+    bp_s = vitals.get("systolic_bp", "?")
+    bp_d = vitals.get("diastolic_bp", "?")
+    spo2 = vitals.get("spo2", "?")
+    temp = vitals.get("temperature", "?")
+    rr = vitals.get("respiratory_rate", "?")
+    logger.info("📥 [PIPELINE] New vitals received — HR=%s  BP=%s/%s  SpO2=%s  Temp=%s  RR=%s",
+                hr, bp_s, bp_d, spo2, temp, rr)
 
     # Step 1: Deterministic triage (fast, free, always runs)
+    logger.info("⚡ [TRIAGE] Running deterministic rule engine...")
     triage = triage_vitals(vitals)
-    logger.info("Triage: %s — %s", triage["severity"], triage["summary"])
+    severity = triage["severity"]
+    abnormal = [f for f in triage["flags"] if f["severity"] != "NORMAL"]
+    logger.info("⚡ [TRIAGE] Result: %s — %d abnormal flags", severity, len(abnormal))
+    for f in abnormal:
+        logger.info("⚡ [TRIAGE]   └─ %s", f["description"])
 
     result = {
         "timestamp": timestamp,
@@ -57,7 +69,7 @@ async def process_vitals(vitals: dict) -> dict:
 
     # Step 2: If normal, skip agent (saves cost + latency)
     if not triage["requires_agent"]:
-        logger.info("All vitals normal — no agent needed")
+        logger.info("✅ [PIPELINE] All vitals normal — skipping LLM agent ($0 cost)")
         result["assessment"] = "All vitals within normal range. No action required."
         return result
 
@@ -65,12 +77,13 @@ async def process_vitals(vitals: dict) -> dict:
     agent_name = triage["recommended_agent"]
     agent = AGENT_MAP.get(agent_name)
     if not agent:
-        logger.warning("Unknown agent: %s, falling back to general_health", agent_name)
+        logger.warning("⚠️ [PIPELINE] Unknown agent '%s' — falling back to general_health", agent_name)
         agent = general_health_agent
         agent_name = "general_health"
 
     result["agent_used"] = agent_name
-    logger.info("Routing to %s agent", agent_name)
+    agent_emoji = {"cardiac": "❤️", "respiratory": "🫁", "general_health": "🩺"}.get(agent_name, "🤖")
+    logger.info("🔀 [ROUTER] Severity=%s → routing to %s %s agent", severity, agent_emoji, agent_name.upper())
 
     # Build the message for the specialist
     prompt = (
@@ -83,15 +96,17 @@ async def process_vitals(vitals: dict) -> dict:
     )
 
     # Step 4: Run specialist agent
+    logger.info("%s [%s] Agent starting LangGraph loop...", agent_emoji, agent_name.upper())
     try:
         agent_result = await agent.ainvoke({
             "messages": [HumanMessage(content=prompt)]
         })
         assessment = agent_result["messages"][-1].content
         result["assessment"] = assessment
-        logger.info("%s agent completed — %d char assessment", agent_name, len(assessment))
+        logger.info("%s [%s] Agent complete — %d char assessment", agent_emoji, agent_name.upper(), len(assessment))
     except Exception as e:
-        logger.error("Agent %s failed: %s", agent_name, e)
+        logger.error("💥 [%s] Agent failed: %s", agent_name.upper(), e)
         result["assessment"] = f"Agent analysis failed: {e}. Based on triage: {triage['summary']}"
 
+    logger.info("📦 [PIPELINE] Done — severity=%s, agent=%s", severity, agent_name)
     return result

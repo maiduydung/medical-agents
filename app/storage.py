@@ -67,7 +67,7 @@ def store_result(result: dict):
         combined = new_table
 
     pq.write_table(combined, VITALS_FILE)
-    logger.info("Stored result to parquet (%d total rows)", combined.num_rows)
+    logger.info("💾 [STORAGE] Stored to parquet (%d total rows)", combined.num_rows)
 
 
 def get_history_path() -> str:

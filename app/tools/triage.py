@@ -120,7 +120,8 @@ def triage_vitals(vitals: dict) -> dict:
     else:
         summary = "[NORMAL] All vitals within normal range."
 
-    logger.info("Triage result: %s (flags: %d abnormal)", max_severity, len(abnormal_flags))
+    logger.info("⚡ [TRIAGE] Result: %s (%d abnormal flags out of %d vitals checked)",
+                max_severity, len(abnormal_flags), len(flags))
 
     return {
         "severity": max_severity,

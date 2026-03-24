@@ -54,11 +54,11 @@ def ingest_to_chroma(text: str, category: str, source_type: str = "web") -> int:
     ids = [str(uuid.uuid4()) for _ in chunks]
     metadatas = [metadata.copy() for _ in chunks]
 
-    logger.info("Embedding %d chunks (category=%s, source=%s)", len(chunks), category, source_type)
+    logger.info("🧠 [CHROMA] Embedding %d chunks (category=%s, source=%s)", len(chunks), category, source_type)
     embeddings = _embed_texts(chunks)
 
     collection = _get_chroma_collection()
     collection.add(ids=ids, documents=chunks, embeddings=embeddings, metadatas=metadatas)
 
-    logger.info("Stored %d chunks in Chroma", len(chunks))
+    logger.info("🧠 [CHROMA] Stored %d chunks in vector DB", len(chunks))
     return len(chunks)

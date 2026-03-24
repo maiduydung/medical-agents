@@ -46,12 +46,13 @@ def _get_llm():
 def agent_node(state: AgentState):
     llm = _get_llm()
     messages = [SystemMessage(content=SYSTEM_PROMPT)] + state["messages"]
+    logger.info("❤️  [CARDIAC] Thinking...")
     response = llm.invoke(messages)
     if hasattr(response, "tool_calls") and response.tool_calls:
         tool_names = [tc["name"] for tc in response.tool_calls]
-        logger.info("[Cardiac] Calling tools: %s", tool_names)
+        logger.info("❤️  [CARDIAC] Calling tools: %s", tool_names)
     else:
-        logger.info("[Cardiac] Producing assessment")
+        logger.info("❤️  [CARDIAC] Producing final assessment")
     return {"messages": [response]}
 
 

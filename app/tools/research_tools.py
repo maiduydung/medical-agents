@@ -28,7 +28,7 @@ def web_search(query: str, category: str = "general") -> str:
         query: Search query, e.g. "tachycardia treatment guidelines 2025"
         category: Category for storage (e.g. "cardiac", "respiratory", "general").
     """
-    logger.info("Web search: %s (category=%s)", query, category)
+    logger.info("🔍 [WEB] Searching: '%s' (category=%s)", query, category)
     client = _get_tavily_client()
     response = client.search(query=query, max_results=5, include_answer=True)
 
@@ -39,7 +39,7 @@ def web_search(query: str, category: str = "general") -> str:
         parts.append(f"[{r.get('title', '')}]({r.get('url', '')})\n{r.get('content', '')}")
 
     extracted = "\n\n---\n\n".join(parts)
-    logger.info("Tavily returned %d results (%d chars)", len(response.get("results", [])), len(extracted))
+    logger.info("🔍 [WEB] Tavily returned %d results (%d chars)", len(response.get("results", [])), len(extracted))
 
     if not extracted or len(extracted) < 20:
         return f"No web results found for '{query}'."
@@ -47,9 +47,9 @@ def web_search(query: str, category: str = "general") -> str:
     # Self-improving: auto-ingest into knowledge base
     try:
         n_chunks = ingest_to_chroma(extracted, category, source_type="web_search")
-        logger.info("Auto-ingested %d chunks into knowledge base", n_chunks)
+        logger.info("🧠 [SELF-IMPROVE] Auto-ingested %d chunks into knowledge base", n_chunks)
     except Exception as e:
-        logger.warning("Auto-ingest failed (non-blocking): %s", e)
+        logger.warning("⚠️  [SELF-IMPROVE] Auto-ingest failed (non-blocking): %s", e)
 
     return extracted
 
@@ -65,7 +65,7 @@ def web_extract(url: str, category: str = "general") -> str:
         url: The URL to extract content from.
         category: Category for storage.
     """
-    logger.info("Extracting URL: %s", url)
+    logger.info("📄 [WEB] Extracting URL: %s", url)
     client = _get_tavily_client()
     response = client.extract(url)
 
@@ -74,16 +74,16 @@ def web_extract(url: str, category: str = "general") -> str:
         parts.append(r.get("raw_content", "") or r.get("content", ""))
 
     extracted = "\n\n".join(parts)
-    logger.info("Extracted %d chars from %s", len(extracted), url)
+    logger.info("📄 [WEB] Extracted %d chars from URL", len(extracted))
 
     if not extracted or len(extracted) < 20:
         return f"Could not extract content from {url}."
 
     try:
         n_chunks = ingest_to_chroma(extracted, category, source_type="web_extract")
-        logger.info("Auto-ingested %d chunks from URL", n_chunks)
+        logger.info("🧠 [SELF-IMPROVE] Auto-ingested %d chunks from URL", n_chunks)
     except Exception as e:
-        logger.warning("Auto-ingest failed (non-blocking): %s", e)
+        logger.warning("⚠️  [SELF-IMPROVE] Auto-ingest failed (non-blocking): %s", e)
 
     return extracted[:3000] + ("..." if len(extracted) > 3000 else "")
 
@@ -99,7 +99,7 @@ def web_research(query: str, category: str = "general") -> str:
         query: Research question, e.g. "What are the latest FDA guidelines for wearable cardiac monitors?"
         category: Category for storage.
     """
-    logger.info("Deep research: %s", query)
+    logger.info("🔬 [WEB] Deep research: '%s'", query)
     client = _get_tavily_client()
     response = client.search(query=query, max_results=10, include_answer=True, search_depth="advanced")
 
@@ -110,15 +110,15 @@ def web_research(query: str, category: str = "general") -> str:
         parts.append(f"[{r.get('title', '')}]({r.get('url', '')})\n{r.get('content', '')}")
 
     extracted = "\n\n---\n\n".join(parts)
-    logger.info("Deep research returned %d chars", len(extracted))
+    logger.info("🔬 [WEB] Deep research returned %d chars", len(extracted))
 
     if not extracted or len(extracted) < 20:
         return f"No research results for '{query}'."
 
     try:
         n_chunks = ingest_to_chroma(extracted, category, source_type="web_research")
-        logger.info("Auto-ingested %d chunks from research", n_chunks)
+        logger.info("🧠 [SELF-IMPROVE] Auto-ingested %d chunks from deep research", n_chunks)
     except Exception as e:
-        logger.warning("Auto-ingest failed (non-blocking): %s", e)
+        logger.warning("⚠️  [SELF-IMPROVE] Auto-ingest failed (non-blocking): %s", e)
 
     return extracted[:5000] + ("..." if len(extracted) > 5000 else "")
