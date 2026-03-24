@@ -2,12 +2,17 @@
 
 import json
 import os
+import sys
 import time
+
+# Add project root to path so we can import app.simulator
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 import streamlit as st
 import httpx
 
 API_URL = "http://localhost:8000"
-DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data")
+DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data")
 VITALS_FILE = os.path.join(DATA_DIR, "vitals_history.parquet")
 
 st.set_page_config(page_title="MedTech Agent Monitor", page_icon="🫀", layout="wide")
