@@ -25,6 +25,7 @@ SCHEMA = pa.schema([
     ("triage_severity", pa.string()),
     ("triage_summary", pa.string()),
     ("agent_used", pa.string()),
+    ("action_taken", pa.string()),
     ("assessment", pa.string()),
 ])
 
@@ -53,6 +54,7 @@ def store_result(result: dict):
         "triage_severity": triage.get("severity", ""),
         "triage_summary": triage.get("summary", ""),
         "agent_used": result.get("agent_used", "") or "",
+        "action_taken": result.get("action", {}).get("action", "") if isinstance(result.get("action"), dict) else "",
         "assessment": result.get("assessment", "") or "",
     }
 

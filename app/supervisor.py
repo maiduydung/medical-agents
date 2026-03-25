@@ -5,7 +5,8 @@ Flow:
 2. Deterministic triage runs FIRST (no LLM, pure rules)
 3. If anomaly detected → route to specialist agent
 4. Specialist analyzes with tools (RAG, FDA, web search)
-5. Return decision + assessment
+5. Action layer: escalate based on severity (notify, page nurse, call 911)
+6. Return decision + assessment + action taken
 """
 
 import logging
@@ -24,12 +25,29 @@ AGENT_MAP = {
     "general_health": general_health_agent,
 }
 
+# Action escalation matrix — deterministic, no LLM needed
+ESCALATION_ACTIONS = {
+    "NORMAL": {
+        "action": "none",
+        "description": "No action required. Vitals within normal range.",
+    },
+    "WARNING": {
+        "action": "notify_patient",
+        "description": "Push notification sent to patient. Suggest monitoring and rest.",
+    },
+    "CRITICAL": {
+        "action": "page_nurse",
+        "description": "Nurse paged via on-call system. Patient flagged for priority review.",
+    },
+    "EMERGENCY": {
+        "action": "call_emergency",
+        "description": "Emergency services contacted. Nurse paged. Patient alerted with emergency instructions.",
+    },
+}
+
 
 async def process_vitals(vitals: dict) -> dict:
     """Process a single vitals reading through the full pipeline.
-
-    Args:
-        vitals: Dict with heart_rate, systolic_bp, diastolic_bp, spo2, temperature, respiratory_rate, etc.
 
     Returns:
         {
@@ -38,6 +56,7 @@ async def process_vitals(vitals: dict) -> dict:
             "triage": dict,
             "agent_used": str | None,
             "assessment": str | None,
+            "action": dict,
         }
     """
     timestamp = datetime.now(timezone.utc).isoformat()
@@ -59,21 +78,30 @@ async def process_vitals(vitals: dict) -> dict:
     for f in abnormal:
         logger.info("⚡ [TRIAGE]   └─ %s", f["description"])
 
+    # Step 2: Determine escalation action (deterministic — always runs)
+    action = ESCALATION_ACTIONS[severity].copy()
+    action_emoji = {
+        "none": "✅", "notify_patient": "📱",
+        "page_nurse": "👩‍⚕️", "call_emergency": "🚨",
+    }.get(action["action"], "❓")
+    logger.info("%s [ACTION] %s — %s", action_emoji, action["action"].upper(), action["description"])
+
     result = {
         "timestamp": timestamp,
         "vitals": vitals,
         "triage": triage,
         "agent_used": None,
         "assessment": None,
+        "action": action,
     }
 
-    # Step 2: If normal, skip agent (saves cost + latency)
+    # Step 3: If normal, skip agent (saves cost + latency)
     if not triage["requires_agent"]:
         logger.info("✅ [PIPELINE] All vitals normal — skipping LLM agent ($0 cost)")
         result["assessment"] = "All vitals within normal range. No action required."
         return result
 
-    # Step 3: Route to specialist agent
+    # Step 4: Route to specialist agent
     agent_name = triage["recommended_agent"]
     agent = AGENT_MAP.get(agent_name)
     if not agent:
@@ -92,10 +120,11 @@ async def process_vitals(vitals: dict) -> dict:
         f"Triage Result: {triage['summary']}\n"
         f"Severity: {triage['severity']}\n"
         f"Flagged vitals: {[f['description'] for f in triage['flags'] if f['severity'] != 'NORMAL']}\n\n"
+        f"Action taken: {action['description']}\n\n"
         f"Please analyze these readings and provide your assessment."
     )
 
-    # Step 4: Run specialist agent
+    # Step 5: Run specialist agent
     logger.info("%s [%s] Agent starting LangGraph loop...", agent_emoji, agent_name.upper())
     try:
         agent_result = await agent.ainvoke({
@@ -108,5 +137,5 @@ async def process_vitals(vitals: dict) -> dict:
         logger.error("💥 [%s] Agent failed: %s", agent_name.upper(), e)
         result["assessment"] = f"Agent analysis failed: {e}. Based on triage: {triage['summary']}"
 
-    logger.info("📦 [PIPELINE] Done — severity=%s, agent=%s", severity, agent_name)
+    logger.info("📦 [PIPELINE] Done — severity=%s, agent=%s, action=%s", severity, agent_name, action["action"])
     return result
