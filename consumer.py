@@ -7,7 +7,6 @@ Usage:
 
 import argparse
 import asyncio
-import json
 import logging
 from app.event_bus import receive_vitals
 from app.supervisor import process_vitals

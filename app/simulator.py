@@ -4,7 +4,6 @@ Produces a mix of normal readings with occasional anomalies to trigger agent ana
 """
 
 import random
-import time
 from datetime import datetime, timezone
 
 

@@ -1,3 +1,8 @@
+# Build artifacts and scratch files
+repomix-output.xml
+prompt.txt
+figma_diagram.js
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]

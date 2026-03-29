@@ -2,7 +2,6 @@
 
 import json
 import logging
-import os
 from azure.servicebus import ServiceBusClient, ServiceBusMessage
 from azure.servicebus.aio import ServiceBusClient as AsyncServiceBusClient
 from config.settings import SERVICEBUS_CONNECTION_STRING, SERVICEBUS_QUEUE_NAME
